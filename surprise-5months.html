@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ความลับบางอย่าง...</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Chonburi&family=Mitr:wght@300;400;500;600&family=Cormorant+Garamond:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    font-family:'Mitr', sans-serif;
+    background:
+      radial-gradient(ellipse at 20% 10%, rgba(232,184,109,0.10), transparent 45%),
+      radial-gradient(ellipse at 85% 85%, rgba(232,144,158,0.12), transparent 50%),
+      linear-gradient(160deg, #26121e 0%, #3c1f30 55%, #2b1522 100%);
+    color:#f7ece2;
+    min-height:100vh;
+    overflow-x:hidden;
+    position:relative;
+  }
+
+  /* ---- ambient stars ---- */
+  #stars{position:fixed; inset:0; pointer-events:none; z-index:0;}
+  .star{
+    position:absolute; width:2px; height:2px; border-radius:50%;
+    background:#f3d9a4; opacity:.5;
+    animation:twinkle 3.5s ease-in-out infinite;
+  }
+  @keyframes twinkle{
+    0%,100%{opacity:.15; transform:scale(1);}
+    50%{opacity:.85; transform:scale(1.6);}
+  }
+
+  .stage{
+    position:relative; z-index:1;
+    min-height:100vh;
+    display:none;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:32px 20px;
+    text-align:center;
+  }
+  .stage.active{display:flex;}
+  .fade-in{animation:fadeIn .8s ease both;}
+  @keyframes fadeIn{from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:translateY(0);}}
+
+  .eyebrow{
+    font-family:'Cormorant Garamond', serif; font-style:italic;
+    letter-spacing:.14em; text-transform:uppercase;
+    color:#e8b86d; font-size:13px; margin-bottom:14px;
+  }
+  h1{
+    font-family:'Chonburi', serif; font-weight:400;
+    font-size:clamp(26px,6vw,40px); line-height:1.35;
+    color:#f7ece2; margin-bottom:16px;
+    text-shadow:0 2px 18px rgba(232,144,158,.25);
+  }
+  p.sub{
+    font-size:15px; line-height:1.9; color:#d9c3ce; max-width:420px;
+    margin:0 auto 10px;
+  }
+
+  /* ---- countdown ---- */
+  .heart-glow{
+    width:74px; height:74px; margin-bottom:22px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:32px;
+    border-radius:50%;
+    background:radial-gradient(circle, rgba(232,144,158,.28), transparent 70%);
+    animation:pulse 2.4s ease-in-out infinite;
+  }
+  @keyframes pulse{0%,100%{transform:scale(1); opacity:.85;} 50%{transform:scale(1.12); opacity:1;}}
+
+  .timer{
+    font-family:'Chonburi', serif;
+    font-size:clamp(48px,13vw,74px);
+    color:#e8b86d;
+    letter-spacing:.03em;
+    margin:26px 0 30px;
+    text-shadow:0 0 30px rgba(232,184,109,.35);
+  }
+  .btn{
+    font-family:'Mitr', sans-serif; font-weight:500; font-size:15px;
+    color:#2a1420; background:linear-gradient(135deg,#f0c98a,#e8909e);
+    border:none; padding:14px 34px; border-radius:999px; cursor:pointer;
+    box-shadow:0 8px 24px rgba(232,144,158,.28);
+    transition:transform .2s ease, box-shadow .2s ease;
+  }
+  .btn:hover{transform:translateY(-2px); box-shadow:0 12px 30px rgba(232,144,158,.4);}
+  .btn:disabled{opacity:.4; cursor:default; transform:none;}
+  .btn-ghost{
+    background:transparent; color:#e8b86d; border:1px solid rgba(232,184,109,.4);
+    box-shadow:none; margin-top:14px;
+  }
+
+  /* ---- quiz ---- */
+  .quiz-wrap{width:100%; max-width:440px;}
+  .progress{
+    display:flex; gap:6px; justify-content:center; margin-bottom:22px;
+  }
+  .dot{width:8px; height:8px; border-radius:50%; background:rgba(247,236,226,.2); transition:.3s;}
+  .dot.done{background:#e8b86d;}
+  .dot.now{background:#e8909e; transform:scale(1.3);}
+
+  .card{
+    background:linear-gradient(160deg, rgba(71,36,54,.75), rgba(58,26,43,.75));
+    border:1px solid rgba(232,184,109,.16);
+    border-radius:22px;
+    padding:30px 24px;
+    backdrop-filter:blur(6px);
+    width:100%;
+  }
+  .qnum{font-family:'Cormorant Garamond',serif; font-style:italic; color:#e8909e; font-size:14px; margin-bottom:8px;}
+  .qtext{font-size:17px; line-height:1.75; margin-bottom:22px; color:#f7ece2;}
+
+  .choices{display:flex; flex-direction:column; gap:10px;}
+  .choice{
+    font-family:'Mitr', sans-serif; font-size:14.5px; text-align:left;
+    background:rgba(247,236,226,.05); color:#f0e4dc;
+    border:1px solid rgba(247,236,226,.14); border-radius:14px;
+    padding:13px 16px; cursor:pointer; transition:.2s;
+  }
+  .choice:hover{border-color:rgba(232,184,109,.5); background:rgba(232,184,109,.08);}
+  .choice.correct{background:rgba(148,201,150,.16); border-color:#94c996; color:#d7f5d8;}
+  .choice.wrong{background:rgba(224,120,120,.14); border-color:#e07878; color:#f5d7d7;}
+  .choice.disabled{pointer-events:none;}
+
+  .text-input{
+    width:100%; padding:13px 16px; border-radius:14px; border:1px solid rgba(247,236,226,.2);
+    background:rgba(247,236,226,.06); color:#f7ece2; font-family:'Mitr',sans-serif; font-size:14.5px;
+    outline:none;
+  }
+  .text-input:focus{border-color:#e8b86d;}
+
+  .feedback{
+    margin-top:18px; font-size:14.5px; line-height:1.8; color:#f0c98a;
+    min-height:20px;
+  }
+
+  /* ---- result ---- */
+  .coupon{
+    width:100%; max-width:300px; margin:24px auto 6px;
+    border:1.5px dashed #e8b86d; border-radius:16px; padding:22px 18px;
+    background:rgba(232,184,109,.06);
+  }
+  .coupon .label{font-family:'Cormorant Garamond',serif; font-style:italic; color:#e8b86d; font-size:13px;}
+  .coupon .title{font-family:'Chonburi',serif; font-size:20px; margin:8px 0 4px; color:#f7ece2;}
+
+  /* ---- letter / envelope ---- */
+  .envelope-scene{width:100%; max-width:340px; margin:10px auto 28px;}
+  .envelope{
+    position:relative; width:100%; aspect-ratio:3/2; cursor:pointer;
+    filter:drop-shadow(0 18px 30px rgba(0,0,0,.35));
+  }
+  .env-body{
+    position:absolute; inset:0; border-radius:10px;
+    background:linear-gradient(160deg,#f3e6d8,#e9d3bd);
+  }
+  .env-flap{
+    position:absolute; top:0; left:0; width:100%; height:52%;
+    background:linear-gradient(160deg,#ecdac4,#dfc1a4);
+    clip-path:polygon(0 0,100% 0,50% 100%);
+    transform-origin:top; transition:transform .8s cubic-bezier(.6,-0.28,.5,1.4);
+  }
+  .envelope.open .env-flap{transform:rotateX(180deg);}
+  .seal{
+    position:absolute; top:38%; left:50%; transform:translate(-50%,-50%);
+    width:52px; height:52px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #e8909e, #b95064);
+    display:flex; align-items:center; justify-content:center;
+    font-size:20px; color:#fff0ee; box-shadow:0 4px 10px rgba(0,0,0,.3);
+    transition:opacity .3s ease, transform .3s ease; z-index:2;
+  }
+  .envelope.open .seal{opacity:0; transform:translate(-50%,-50%) scale(.4);}
+  .env-hint{margin-top:14px; font-size:13px; color:#d9c3ce; font-family:'Cormorant Garamond',serif; font-style:italic;}
+
+  .letter-paper{
+    display:none; width:100%; max-width:420px; margin:0 auto;
+    background:linear-gradient(180deg,#fbf3e7,#f4e6d3);
+    color:#3a2419; border-radius:6px; padding:34px 26px;
+    box-shadow:0 20px 50px rgba(0,0,0,.4);
+    text-align:left; line-height:2; font-size:15px;
+    max-height:60vh; overflow-y:auto;
+  }
+  .letter-paper.show{display:block; animation:fadeIn .9s ease both;}
+  .letter-paper .lt-title{
+    font-family:'Chonburi',serif; font-size:20px; text-align:center;
+    margin-bottom:18px; color:#8a3b52;
+  }
+
+  footer.credit{margin-top:26px; font-size:11px; color:rgba(247,236,226,.3); letter-spacing:.05em;}
+
+  /* ---- nav bar ---- */
+  .stage{padding-bottom:86px;}
+  .nav-bar{
+    position:fixed; bottom:0; left:0; width:100%; z-index:20;
+    display:flex; justify-content:center; gap:10px; flex-wrap:wrap;
+    padding:16px 16px 20px;
+    background:linear-gradient(0deg, rgba(30,14,23,.96) 40%, rgba(30,14,23,0));
+    opacity:0; pointer-events:none; transform:translateY(10px);
+    transition:opacity .35s ease, transform .35s ease;
+  }
+  .nav-bar.visible{opacity:1; pointer-events:auto; transform:translateY(0);}
+  .nav-btn{
+    font-family:'Mitr', sans-serif; font-size:12.5px; color:#f7ece2;
+    background:rgba(247,236,226,.07); border:1px solid rgba(247,236,226,.18);
+    border-radius:999px; padding:9px 16px; cursor:pointer;
+    backdrop-filter:blur(6px); transition:.2s;
+  }
+  .nav-btn:hover{background:rgba(232,184,109,.16); border-color:rgba(232,184,109,.45);}
+  .nav-btn.active-here{background:rgba(232,144,158,.16); border-color:rgba(232,144,158,.5); color:#f0c3cb;}
+
+</style>
+</head>
+<body>
+
+<div id="stars"></div>
+
+<div class="nav-bar" id="navBar">
+  <button class="nav-btn" id="navCoupon">🎟 หน้าคูปอง</button>
+  <button class="nav-btn" id="navLetter">💌 หน้าจดหมาย</button>
+  <button class="nav-btn" id="navRestart">🔄 เริ่มใหม่</button>
+</div>
+
+
+<!-- STAGE 1: COUNTDOWN -->
+<section class="stage active" id="stage-countdown">
+  <div class="fade-in">
+    <div class="eyebrow">shh... it's a secret</div>
+    <div class="heart-glow">🤍</div>
+    <h1>มีบางอย่าง<br>กำลังจะถูกปลดล็อก</h1>
+    <p class="sub">อีกไม่กี่นาที เธอจะได้รู้ว่ามันคืออะไร<br>กดปุ่มด้านล่างเพื่อเริ่มการนับถอยหลัง</p>
+    <div class="timer" id="timerDisplay">00:10</div>
+    <button class="btn" id="startCountdownBtn">เริ่มนับถอยหลัง</button>
+  </div>
+</section>
+
+<!-- STAGE 2: QUIZ -->
+<section class="stage" id="stage-quiz">
+  <div class="quiz-wrap fade-in">
+    <div class="eyebrow">ด่านพิสูจน์ใจ</div>
+    <h1 style="font-size:22px; margin-bottom:20px;">ตอบให้ถูก ถึงจะปลดล็อกของขวัญ</h1>
+    <div class="progress" id="progressDots"></div>
+    <div class="card" id="quizCard"></div>
+  </div>
+</section>
+
+<!-- STAGE 3: RESULT -->
+<section class="stage" id="stage-result">
+  <div class="fade-in" id="resultContent"></div>
+</section>
+
+<!-- STAGE 4: LETTER -->
+<section class="stage" id="stage-letter">
+  <div class="fade-in" style="width:100%;">
+    <div class="eyebrow">5 เดือนของเรา</div>
+    <h1>จดหมายลับ</h1>
+    <p class="sub">แตะที่ซองจดหมายเพื่อเปิดอ่าน</p>
+
+    <div class="envelope-scene">
+      <div class="envelope" id="envelope">
+        <div class="env-body"></div>
+        <div class="env-flap"></div>
+        <div class="seal">🤍</div>
+      </div>
+      <div class="env-hint" id="envHint">แตะเพื่อเปิดซอง</div>
+    </div>
+
+    <div class="letter-paper" id="letterPaper">
+      <div class="lt-title">สุขสันต์วันครบรอบ 5 เดือนนะอ้วนของเค้าา🤍</div>
+      <p>วันนี้เราคบกันครบ 5เดือนแล้วว ขอบคุณที่อยู่กับเค้ามาตลอดนะะ ขอบคุณสำหรับความรักที่มีให้เค้าา ใส่จายกาน และก็ตลอดเวลาที่มีความสุขด้วยกาน วันที่เรามีความสุขด้วยกันน วันที่เราเหนื่อย หรือม่ายก็วันที่เรามีเรื่องม่ายเข้าใจกาน สุดท้ายเราก็ยังดีกันแล้วก็ผ่านมันมาด้วยกันด้ายเสมออ การมีโมอยู่ในชีวิตเค้ามันก็ทำให้ทุกวันของเค้ามีความหมายมากขึ้นน มีความสุข แค่ด้ายคุย ด้ายเจอ หรือด้ายเห็นโมยิ้ม เค้าก็มีความสุขแล่ว ขอบคุณที่คอยเป็นกำลังใจให้เค้าา และอยู่ข้างๆกันมาตลอด ถ้าวันไหนเค้าทำให้โมเสียใจจ ทำให้โมน้อยใจจ หรือทำอะไรม่ายดี เค้าก็ขอโทดนะ เค้าจะพยายามเป็นคนที่ดีขึ้นน เพื่อให้โมมีความสุขตอนอยู่กับอยู่กับเค้าา เค้าคิดว่าเราจะได้สร้างความทรงจำดียๆด้วยกานอีกเย้อ คอยช่วยยกัน ดูแลกันน และเติบโตไปด้วยกันจนโตเล้ยย ขอบคุณที่ยังเลือกเค้า และขอบคุณที่ยังรักเค้าจนถึงวันนี้นะะ สุขสันต์วันครบรอบ 5 เดือนนะอ้วน ขอให้เราอยู่ด้วยกันไปนานนๆเลย</p>
+      <p style="margin-top:18px; text-align:right; font-weight:500;">เค้ารักโมม้ากกๆเลยยนะะ💗</p>
+    </div>
+    <footer class="credit">made with 🤍 · 5 months</footer>
+  </div>
+</section>
+
+<script>
+/* ---------- ambient stars ---------- */
+const starsEl = document.getElementById('stars');
+for(let i=0;i<40;i++){
+  const s=document.createElement('div');
+  s.className='star';
+  s.style.left=Math.random()*100+'%';
+  s.style.top=Math.random()*100+'%';
+  s.style.animationDelay=(Math.random()*3.5)+'s';
+  starsEl.appendChild(s);
+}
+
+/* ---------- stage switching ---------- */
+function goStage(id){
+  document.querySelectorAll('.stage').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+/* ---------- countdown ---------- */
+const startBtn = document.getElementById('startCountdownBtn');
+const timerDisplay = document.getElementById('timerDisplay');
+const INITIAL_SECONDS = 10; // สำหรับทดสอบ — เปลี่ยนเป็น 10*60 สำหรับของจริง (10 นาที)
+let totalSeconds = INITIAL_SECONDS;
+let quizCompletedOnce = false;
+
+function updateTimerText(){
+  const m = String(Math.floor(totalSeconds/60)).padStart(2,'0');
+  const s = String(totalSeconds%60).padStart(2,'0');
+  timerDisplay.textContent = `${m}:${s}`;
+}
+updateTimerText();
+
+function startCountdown(){
+  startBtn.disabled = true;
+  startBtn.textContent = 'กำลังนับถอยหลัง...';
+  const interval = setInterval(()=>{
+    totalSeconds--;
+    updateTimerText();
+    if(totalSeconds<=0){
+      clearInterval(interval);
+      if(quizCompletedOnce){
+        // เคยตอบครบแล้ว ใช้คำตอบเดิม ข้ามไปหน้าผลลัพธ์เลย
+        showResult();
+      } else {
+        goStage('stage-quiz');
+        renderQuestion();
+      }
+    }
+  },1000);
+}
+startBtn.addEventListener('click', startCountdown);
+
+function restartFlow(){
+  totalSeconds = INITIAL_SECONDS;
+  updateTimerText();
+  startBtn.disabled = false;
+  startBtn.textContent = 'เริ่มนับถอยหลัง';
+  goStage('stage-countdown');
+}
+
+/* ---------- quiz data ---------- */
+const questions = [
+  {
+    q: 'จำได้ไหมว่าวันแรกที่เราเริ่มคุยกัน หรือวันที่เราตกลงคบกัน คือวันที่เท่าไหร่?',
+    type:'choice',
+    choices:['22','2','44','14'],
+    correct:'14',
+    success:'เก่งมาก! จำแม่นแบบนี้เอาไปเลย 10 คะแนนเต็ม ❤️'
+  },
+  {
+    q:'เวลาเค้าเหงา/อารมณ์ไม่ดี เมนูโปรดที่เห็นแล้วเค้าจะอารมณ์ดีขึ้นทันทีคืออะไร?',
+    type:'choice',
+    choices:['ชาไข่มุก','หมูกระทะ','ขนมหวาน','หมูกรอบ'],
+    correct:'หมูกรอบ',
+    success:'รู้ใจที่สุด! สมกับเป็นแฟนเค้าจริงๆ 😋'
+  },
+  {
+    q:"เวลาอยู่ไกลกัน แล้วเค้าพิมพ์มาว่า 'ทำไรอยู่' ความหมายที่แท้จริงคืออะไร?",
+    type:'choice',
+    choices:['A. ถามไปอย่างนั้นแหละ','B. อยากรู้จริงๆ ว่าทำอะไร','C. คิดถึงมากๆ อยากคุยด้วยแล้ว!'],
+    correct:'C. คิดถึงมากๆ อยากคุยด้วยแล้ว!',
+    success:'ถูกเป๊ะ! ต่อไปถ้าพิมพ์คำนี้ แปลว่าคิดถึงอยู่นะรู้ยัง 🥰'
+  },
+  {
+    q:'รูปคู่รูปแรกที่เราถ่ายด้วยกัน หรือสถานที่แรกที่เราไปเที่ยวด้วยกันคือที่ไหน?',
+    type:'text',
+    success:'ย้อนนึกถึงตอนนั้นแล้วยังเขินอยู่นะเนี่ย 😳'
+  },
+  {
+    q:'ข้อสุดท้ายแล้ว... คบกันมา 5 เดือนแล้ว รู้อยู่แล้วใช่ไหมว่าเค้ารักเธอมากขนาดไหน?',
+    type:'choice',
+    choices:['A. รู้แล้วรักเหมือนกัน','B. รู้สิ รักที่สุดเลย','C. รู้แล้ว และกดปุ่มนี้เพื่ออ่านจดหมายลับได้เลย!'],
+    correct:'C. รู้แล้ว และกดปุ่มนี้เพื่ออ่านจดหมายลับได้เลย!',
+    success:'ปลดล็อกสำเร็จ! เตรียมใจไว้เลยนะ... 💌'
+  }
+];
+let currentQ = 0;
+let wrongCount = 0;
+
+function renderDots(){
+  const wrap = document.getElementById('progressDots');
+  wrap.innerHTML = '';
+  questions.forEach((_,i)=>{
+    const d = document.createElement('div');
+    d.className = 'dot' + (i<currentQ?' done':'') + (i===currentQ?' now':'');
+    wrap.appendChild(d);
+  });
+}
+
+function renderQuestion(){
+  renderDots();
+  const card = document.getElementById('quizCard');
+  const item = questions[currentQ];
+  let inner = `<div class="qnum">ข้อที่ ${currentQ+1} / ${questions.length}</div>
+               <div class="qtext">${item.q}</div>`;
+
+  if(item.type==='choice'){
+    inner += `<div class="choices">` + item.choices.map(c=>
+      `<button class="choice" data-val="${c}">${c}</button>`
+    ).join('') + `</div>`;
+  } else {
+    inner += `<input type="text" class="text-input" id="textAns" placeholder="พิมพ์คำตอบของเธอที่นี่...">
+               <button class="btn" id="submitTextBtn" style="margin-top:16px; width:100%;">ยืนยันคำตอบ</button>`;
+  }
+  inner += `<div class="feedback" id="feedback"></div>`;
+  card.innerHTML = inner;
+
+  if(item.type==='choice'){
+    card.querySelectorAll('.choice').forEach(btn=>{
+      btn.addEventListener('click', ()=> handleChoiceAnswer(btn, item));
+    });
+  } else {
+    document.getElementById('submitTextBtn').addEventListener('click', ()=> handleTextAnswer(item));
+  }
+}
+
+function handleChoiceAnswer(btn, item){
+  const allBtns = document.querySelectorAll('.choice');
+  allBtns.forEach(b=>b.classList.add('disabled'));
+  const isCorrect = btn.dataset.val === item.correct;
+  if(isCorrect){
+    btn.classList.add('correct');
+  } else {
+    btn.classList.add('wrong');
+    wrongCount++;
+    allBtns.forEach(b=>{ if(b.dataset.val===item.correct) b.classList.add('correct'); });
+  }
+  document.getElementById('feedback').textContent = isCorrect ? item.success : 'ยังไม่ถูกนะ 😅 แต่ไม่เป็นไร ไปข้อต่อไปกันเลย';
+  advanceAfterDelay();
+}
+
+function handleTextAnswer(item){
+  const val = document.getElementById('textAns').value.trim();
+  document.getElementById('submitTextBtn').disabled = true;
+  document.getElementById('textAns').disabled = true;
+  if(val.length===0){
+    wrongCount++;
+    document.getElementById('feedback').textContent = 'เธอลืมตอบรึเปล่าเนี่ย 🥲';
+  } else {
+    document.getElementById('feedback').textContent = item.success;
+  }
+  advanceAfterDelay();
+}
+
+function advanceAfterDelay(){
+  setTimeout(()=>{
+    currentQ++;
+    if(currentQ < questions.length){
+      renderQuestion();
+    } else {
+      showResult();
+    }
+  }, 1600);
+}
+
+function showResult(){
+  goStage('stage-result');
+  quizCompletedOnce = true;
+  document.getElementById('navBar').classList.add('visible');
+  const wrap = document.getElementById('resultContent');
+  if(wrongCount===0){
+    wrap.innerHTML = `
+      <div class="eyebrow">ยินดีด้วยย</div>
+      <h1>ตอบถูกครบทุกข้อเลย! 🎉</h1>
+      <p class="sub">สมกับเป็นคนที่รู้ใจกันที่สุดจริงๆ</p>
+      <div class="coupon">
+        <div class="label">reward</div>
+        <div class="title">คูปองตามใจ 1 ใบ</div>
+        <p class="sub" style="margin:0;">ใช้ได้ 1 ครั้ง ตามใจทุกอย่างที่อยากให้ทำ 🤍</p>
+      </div>
+      <p class="sub" style="margin-top:18px;">อย่าลืมแคปหน้าจอนี้ไว้เป็นหลักฐานด้วยนะ 📸</p>
+      <button class="btn" id="toLetterBtn" style="margin-top:22px;">ไปต่อ → จดหมายลับ</button>
+    `;
+  } else {
+    wrap.innerHTML = `
+      <div class="eyebrow">ผลลัพธ์</div>
+      <h1>ตอบผิดไป ${wrongCount} ข้อ</h1>
+      <p class="sub">งั้นตามสัญญานะ... วิดพื้น <strong style="color:#e8b86d;">${wrongCount}</strong> ครั้งให้ดูหน่อยย 😏</p>
+      <button class="btn" id="toLetterBtn" style="margin-top:22px;">วิดพื้นเสร็จแล้ว ไปต่อ →</button>
+    `;
+  }
+  document.getElementById('toLetterBtn').addEventListener('click', ()=> goStage('stage-letter'));
+}
+
+/* ---------- envelope / letter ---------- */
+const envelope = document.getElementById('envelope');
+const letterPaper = document.getElementById('letterPaper');
+const envHint = document.getElementById('envHint');
+envelope.addEventListener('click', ()=>{
+  if(envelope.classList.contains('open')) return;
+  envelope.classList.add('open');
+  envHint.textContent = 'กำลังเปิดจดหมาย...';
+  setTimeout(()=>{
+    letterPaper.classList.add('show');
+    envHint.textContent = '';
+  }, 700);
+});
+</script>
+</body>
+</html>
