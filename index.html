@@ -156,43 +156,90 @@
   .coupon .label{font-family:'Cormorant Garamond',serif; font-style:italic; color:#e8b86d; font-size:13px;}
   .coupon .title{font-family:'Chonburi',serif; font-size:20px; margin:8px 0 4px; color:#f7ece2;}
 
-  /* ---- letter / envelope ---- */
-  .envelope-scene{width:100%; max-width:340px; margin:10px auto 28px;}
+  /* ---- ENHANCED ENVELOPE & LETTER ANIMATION ---- */
+  .envelope-scene{
+    width:100%; max-width:340px; margin:15px auto 10px;
+    position:relative; perspective:1000px;
+  }
   .envelope{
     position:relative; width:100%; aspect-ratio:3/2; cursor:pointer;
-    filter:drop-shadow(0 18px 30px rgba(0,0,0,.35));
+    filter:drop-shadow(0 18px 30px rgba(0,0,0,.45));
+    transition:transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.8s ease;
   }
   .env-body{
-    position:absolute; inset:0; border-radius:10px;
+    position:absolute; inset:0; border-radius:12px;
     background:linear-gradient(160deg,#f3e6d8,#e9d3bd);
+    box-shadow:inset 0 0 20px rgba(0,0,0,0.08);
   }
   .env-flap{
     position:absolute; top:0; left:0; width:100%; height:52%;
     background:linear-gradient(160deg,#ecdac4,#dfc1a4);
     clip-path:polygon(0 0,100% 0,50% 100%);
-    transform-origin:top; transition:transform .8s cubic-bezier(.6,-0.28,.5,1.4);
+    transform-origin:top; 
+    transition:transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index:3;
   }
-  .envelope.open .env-flap{transform:rotateX(180deg);}
+  .envelope.open .env-flap{
+    transform:rotateX(180deg);
+    z-index:1;
+  }
+  .envelope.open{
+    transform:translateY(40px) scale(0.92);
+    opacity:0.25;
+    pointer-events:none;
+  }
   .seal{
     position:absolute; top:38%; left:50%; transform:translate(-50%,-50%);
-    width:52px; height:52px; border-radius:50%;
-    background:radial-gradient(circle at 35% 30%, #e8909e, #b95064);
+    width:54px; height:54px; border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #f0a0ad, #b95064);
     display:flex; align-items:center; justify-content:center;
-    font-size:20px; color:#fff0ee; box-shadow:0 4px 10px rgba(0,0,0,.3);
-    transition:opacity .3s ease, transform .3s ease; z-index:2;
+    font-size:22px; color:#fff0ee; box-shadow:0 6px 14px rgba(0,0,0,.35);
+    transition:opacity .4s ease, transform .4s ease; z-index:4;
+    animation:sealPulse 2s infinite ease-in-out;
   }
-  .envelope.open .seal{opacity:0; transform:translate(-50%,-50%) scale(.4);}
-  .env-hint{margin-top:14px; font-size:13px; color:#d9c3ce; font-family:'Cormorant Garamond',serif; font-style:italic;}
+  @keyframes sealPulse {
+    0%,100%{ transform:translate(-50%,-50%) scale(1); }
+    50%{ transform:translate(-50%,-50%) scale(1.08); }
+  }
+  .envelope.open .seal{
+    opacity:0; transform:translate(-50%,-50%) scale(.2);
+    animation:none;
+  }
+  .env-hint{
+    margin-top:14px; font-size:13px; color:#d9c3ce; 
+    font-family:'Cormorant Garamond',serif; font-style:italic;
+    transition:opacity 0.5s ease;
+  }
 
-  .letter-paper{
-    display:none; width:100%; max-width:420px; margin:0 auto;
-    background:linear-gradient(180deg,#fbf3e7,#f4e6d3);
-    color:#3a2419; border-radius:6px; padding:34px 26px;
-    box-shadow:0 20px 50px rgba(0,0,0,.4);
-    text-align:left; line-height:2; font-size:15px;
-    max-height:60vh; overflow-y:auto;
+  /* ---- Particle Burst Effect ---- */
+  .sparkle-particle {
+    position:absolute; pointer-events:none; z-index:10;
+    font-size:18px; animation:burstParticle 1.2s forwards cubic-bezier(0.1, 0.8, 0.3, 1);
   }
-  .letter-paper.show{display:block; animation:fadeIn .9s ease both;}
+  @keyframes burstParticle {
+    0% { opacity:1; transform:translate(0, 0) scale(0.5) rotate(0deg); }
+    100% { opacity:0; transform:translate(var(--dx), var(--dy)) scale(1.4) rotate(360deg); }
+  }
+
+  /* ---- Letter Paper Rising ---- */
+  .letter-paper{
+    display:none; width:100%; max-width:420px; margin:-40px auto 0;
+    background:linear-gradient(180deg,#fbf3e7,#f4e6d3);
+    color:#3a2419; border-radius:12px; padding:34px 26px;
+    box-shadow:0 20px 50px rgba(0,0,0,.5);
+    text-align:left; line-height:2; font-size:15px;
+    max-height:65vh; overflow-y:auto;
+    position:relative; z-index:5;
+    opacity:0; transform:translateY(60px) scale(0.9);
+  }
+  .letter-paper.show{
+    display:block; 
+    animation:letterRise 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  @keyframes letterRise {
+    0% { opacity:0; transform:translateY(60px) scale(0.85); }
+    100% { opacity:1; transform:translateY(0) scale(1); }
+  }
   .letter-paper .lt-title{
     font-family:'Chonburi',serif; font-size:20px; text-align:center;
     margin-bottom:18px; color:#8a3b52;
@@ -265,13 +312,13 @@
     <h1>จดหมายลับ</h1>
     <p class="sub">แตะที่ซองจดหมายเพื่อเปิดอ่าน</p>
 
-    <div class="envelope-scene">
+    <div class="envelope-scene" id="envScene">
       <div class="envelope" id="envelope">
         <div class="env-body"></div>
         <div class="env-flap"></div>
         <div class="seal">🤍</div>
       </div>
-      <div class="env-hint" id="envHint">แตะเพื่อเปิดซอง</div>
+      <div class="env-hint" id="envHint">✨ แตะเพื่อเปิดซอง ✨</div>
     </div>
 
     <div class="letter-paper" id="letterPaper">
@@ -346,6 +393,14 @@ function restartFlow(){
   userAnswers = {};
   wrongCount = 0;
   quizCompletedOnce = false;
+  
+  /* Reset envelope & letter */
+  envelope.classList.remove('open');
+  letterPaper.classList.remove('show');
+  letterPaper.style.display = 'none';
+  envHint.style.opacity = '1';
+  envHint.textContent = '✨ แตะเพื่อเปิดซอง ✨';
+
   document.getElementById('navBar').classList.remove('visible');
   goStage('stage-countdown');
 }
@@ -578,18 +633,47 @@ function showResult(){
   document.getElementById('toLetterBtn').addEventListener('click', ()=> goStage('stage-letter'));
 }
 
-/* ---------- envelope / letter ---------- */
+/* ---------- ANIMATED ENVELOPE & LETTER SYSTEM ---------- */
 const envelope = document.getElementById('envelope');
 const letterPaper = document.getElementById('letterPaper');
 const envHint = document.getElementById('envHint');
+const envScene = document.getElementById('envScene');
+
+function createSparkles() {
+  const icons = ['✨', '💖', '🌸', '💗', '⭐'];
+  for(let i=0; i<18; i++){
+    const particle = document.createElement('div');
+    particle.className = 'sparkle-particle';
+    particle.textContent = icons[Math.floor(Math.random()*icons.length)];
+    
+    const angle = Math.random() * Math.PI * 2;
+    const distance = 80 + Math.random() * 120;
+    const dx = Math.cos(angle) * distance + 'px';
+    const dy = Math.sin(angle) * distance - 40 + 'px';
+    
+    particle.style.setProperty('--dx', dx);
+    particle.style.setProperty('--dy', dy);
+    particle.style.left = '50%';
+    particle.style.top = '40%';
+    
+    envScene.appendChild(particle);
+    setTimeout(() => particle.remove(), 1200);
+  }
+}
+
 envelope.addEventListener('click', ()=>{
   if(envelope.classList.contains('open')) return;
+  
+  /* Step 1: Open flap & trigger sparkles */
   envelope.classList.add('open');
-  envHint.textContent = 'กำลังเปิดจดหมาย...';
+  envHint.style.opacity = '0';
+  createSparkles();
+  
+  /* Step 2: Unfold letter paper smoothly */
   setTimeout(()=>{
     letterPaper.classList.add('show');
-    envHint.textContent = '';
-  }, 700);
+    letterPaper.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 500);
 });
 
 /* ---------- Navigation Bar Listeners ---------- */
