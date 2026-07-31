@@ -91,10 +91,6 @@
   }
   .btn:hover{transform:translateY(-2px); box-shadow:0 12px 30px rgba(232,144,158,.4);}
   .btn:disabled{opacity:.4; cursor:default; transform:none;}
-  .btn-ghost{
-    background:transparent; color:#e8b86d; border:1px solid rgba(232,184,109,.4);
-    box-shadow:none; margin-top:14px;
-  }
 
   /* ---- quiz ---- */
   .quiz-wrap{width:100%; max-width:440px;}
@@ -139,6 +135,16 @@
     margin-top:18px; font-size:14.5px; line-height:1.8; color:#f0c98a;
     min-height:20px;
   }
+
+  .quiz-actions{
+    display:flex; justify-content:space-between; align-items:center; margin-top:16px; gap:10px;
+  }
+  .btn-back-quiz{
+    font-family:'Mitr', sans-serif; font-size:13px; color:#e8b86d;
+    background:transparent; border:1px solid rgba(232,184,109,.4);
+    border-radius:999px; padding:8px 18px; cursor:pointer; transition:.2s;
+  }
+  .btn-back-quiz:hover{background:rgba(232,184,109,.15);}
 
   /* ---- result ---- */
   .coupon{
@@ -211,7 +217,6 @@
     backdrop-filter:blur(6px); transition:.2s;
   }
   .nav-btn:hover{background:rgba(232,184,109,.16); border-color:rgba(232,184,109,.45);}
-  .nav-btn.active-here{background:rgba(232,144,158,.16); border-color:rgba(232,144,158,.5); color:#f0c3cb;}
 
 </style>
 </head>
@@ -299,9 +304,10 @@ function goStage(id){
 /* ---------- countdown ---------- */
 const startBtn = document.getElementById('startCountdownBtn');
 const timerDisplay = document.getElementById('timerDisplay');
-const INITIAL_SECONDS = 10; // สำหรับทดสอบ — เปลี่ยนเป็น 10*60 สำหรับของจริง (10 นาที)
+const INITIAL_SECONDS = 10;
 let totalSeconds = INITIAL_SECONDS;
 let quizCompletedOnce = false;
+let timerInterval = null;
 
 function updateTimerText(){
   const m = String(Math.floor(totalSeconds/60)).padStart(2,'0');
@@ -313,13 +319,13 @@ updateTimerText();
 function startCountdown(){
   startBtn.disabled = true;
   startBtn.textContent = 'กำลังนับถอยหลัง...';
-  const interval = setInterval(()=>{
+  if(timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(()=>{
     totalSeconds--;
     updateTimerText();
     if(totalSeconds<=0){
-      clearInterval(interval);
+      clearInterval(timerInterval);
       if(quizCompletedOnce){
-        // เคยตอบครบแล้ว ใช้คำตอบเดิม ข้ามไปหน้าผลลัพธ์เลย
         showResult();
       } else {
         goStage('stage-quiz');
@@ -331,10 +337,15 @@ function startCountdown(){
 startBtn.addEventListener('click', startCountdown);
 
 function restartFlow(){
+  if(timerInterval) clearInterval(timerInterval);
   totalSeconds = INITIAL_SECONDS;
   updateTimerText();
   startBtn.disabled = false;
   startBtn.textContent = 'เริ่มนับถอยหลัง';
+  currentQ = 0;
+  userAnswers = {};
+  wrongCount = 0;
+  document.getElementById('navBar').classList.remove('visible');
   goStage('stage-countdown');
 }
 
@@ -374,8 +385,11 @@ const questions = [
     success:'ปลดล็อกสำเร็จ! เตรียมใจไว้เลยนะ... 💌'
   }
 ];
+
 let currentQ = 0;
+let userAnswers = {};
 let wrongCount = 0;
+let advanceTimeout = null;
 
 function renderDots(){
   const wrap = document.getElementById('progressDots');
@@ -388,6 +402,7 @@ function renderDots(){
 }
 
 function renderQuestion(){
+  if(advanceTimeout) clearTimeout(advanceTimeout);
   renderDots();
   const card = document.getElementById('quizCard');
   const item = questions[currentQ];
@@ -399,10 +414,17 @@ function renderQuestion(){
       `<button class="choice" data-val="${c}">${c}</button>`
     ).join('') + `</div>`;
   } else {
-    inner += `<input type="text" class="text-input" id="textAns" placeholder="พิมพ์คำตอบของเธอที่นี่...">
+    const savedText = userAnswers[currentQ] || '';
+    inner += `<input type="text" class="text-input" id="textAns" value="${savedText}" placeholder="พิมพ์คำตอบของเธอที่นี่...">
                <button class="btn" id="submitTextBtn" style="margin-top:16px; width:100%;">ยืนยันคำตอบ</button>`;
   }
+
   inner += `<div class="feedback" id="feedback"></div>`;
+
+  if(currentQ > 0){
+    inner += `<div class="quiz-actions"><button class="btn-back-quiz" id="prevQuizBtn">⬅️ ข้อก่อนหน้า</button></div>`;
+  }
+
   card.innerHTML = inner;
 
   if(item.type==='choice'){
@@ -412,17 +434,24 @@ function renderQuestion(){
   } else {
     document.getElementById('submitTextBtn').addEventListener('click', ()=> handleTextAnswer(item));
   }
+
+  const prevBtn = document.getElementById('prevQuizBtn');
+  if(prevBtn){
+    prevBtn.addEventListener('click', prevQuestion);
+  }
 }
 
 function handleChoiceAnswer(btn, item){
   const allBtns = document.querySelectorAll('.choice');
   allBtns.forEach(b=>b.classList.add('disabled'));
-  const isCorrect = btn.dataset.val === item.correct;
+  const selectedVal = btn.dataset.val;
+  userAnswers[currentQ] = selectedVal;
+  
+  const isCorrect = selectedVal === item.correct;
   if(isCorrect){
     btn.classList.add('correct');
   } else {
     btn.classList.add('wrong');
-    wrongCount++;
     allBtns.forEach(b=>{ if(b.dataset.val===item.correct) b.classList.add('correct'); });
   }
   document.getElementById('feedback').textContent = isCorrect ? item.success : 'ยังไม่ถูกนะ 😅 แต่ไม่เป็นไร ไปข้อต่อไปกันเลย';
@@ -431,10 +460,10 @@ function handleChoiceAnswer(btn, item){
 
 function handleTextAnswer(item){
   const val = document.getElementById('textAns').value.trim();
+  userAnswers[currentQ] = val;
   document.getElementById('submitTextBtn').disabled = true;
   document.getElementById('textAns').disabled = true;
   if(val.length===0){
-    wrongCount++;
     document.getElementById('feedback').textContent = 'เธอลืมตอบรึเปล่าเนี่ย 🥲';
   } else {
     document.getElementById('feedback').textContent = item.success;
@@ -442,15 +471,35 @@ function handleTextAnswer(item){
   advanceAfterDelay();
 }
 
+function prevQuestion(){
+  if(advanceTimeout) clearTimeout(advanceTimeout);
+  if(currentQ > 0){
+    currentQ--;
+    renderQuestion();
+  }
+}
+
 function advanceAfterDelay(){
-  setTimeout(()=>{
+  advanceTimeout = setTimeout(()=>{
     currentQ++;
     if(currentQ < questions.length){
       renderQuestion();
     } else {
-      showResult();
+      calculateResultAndShow();
     }
   }, 1600);
+}
+
+function calculateResultAndShow(){
+  wrongCount = 0;
+  questions.forEach((q, i) => {
+    if(q.type === 'choice' && userAnswers[i] !== q.correct){
+      wrongCount++;
+    } else if(q.type === 'text' && (!userAnswers[i] || userAnswers[i].trim() === '')){
+      wrongCount++;
+    }
+  });
+  showResult();
 }
 
 function showResult(){
@@ -494,6 +543,25 @@ envelope.addEventListener('click', ()=>{
     letterPaper.classList.add('show');
     envHint.textContent = '';
   }, 700);
+});
+
+/* ---------- Navigation Bar Listeners ---------- */
+document.getElementById('navCoupon').addEventListener('click', ()=>{
+  if(quizCompletedOnce){
+    showResult();
+  } else {
+    alert('ต้องผ่านด่านควิซให้จบก่อนน้าถึงจะดูคูปองได้ 😊');
+  }
+});
+
+document.getElementById('navLetter').addEventListener('click', ()=>{
+  goStage('stage-letter');
+});
+
+document.getElementById('navRestart').addEventListener('click', ()=>{
+  if(confirm('ต้องการเริ่มเกมนับถอยหลังใหม่อีกครั้งไหมครับ?')){
+    restartFlow();
+  }
 });
 </script>
 </body>
