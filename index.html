@@ -40,7 +40,7 @@
     flex-direction:column;
     align-items:center;
     justify-content:center;
-    padding:32px 20px;
+    padding:32px 20px 86px;
     text-align:center;
   }
   .stage.active{display:flex;}
@@ -119,10 +119,10 @@
     border:1px solid rgba(247,236,226,.14); border-radius:14px;
     padding:13px 16px; cursor:pointer; transition:.2s;
   }
-  .choice:hover{border-color:rgba(232,184,109,.5); background:rgba(232,184,109,.08);}
+  .choice:hover:not(.disabled){border-color:rgba(232,184,109,.5); background:rgba(232,184,109,.08);}
   .choice.correct{background:rgba(148,201,150,.16); border-color:#94c996; color:#d7f5d8;}
   .choice.wrong{background:rgba(224,120,120,.14); border-color:#e07878; color:#f5d7d7;}
-  .choice.disabled{pointer-events:none;}
+  .choice.disabled{pointer-events:none; opacity:0.85;}
 
   .text-input{
     width:100%; padding:13px 16px; border-radius:14px; border:1px solid rgba(247,236,226,.2);
@@ -130,6 +130,7 @@
     outline:none;
   }
   .text-input:focus{border-color:#e8b86d;}
+  .text-input:disabled{opacity:0.7;}
 
   .feedback{
     margin-top:18px; font-size:14.5px; line-height:1.8; color:#f0c98a;
@@ -137,14 +138,14 @@
   }
 
   .quiz-actions{
-    display:flex; justify-content:space-between; align-items:center; margin-top:16px; gap:10px;
+    display:flex; justify-content:space-between; align-items:center; margin-top:18px; gap:10px;
   }
-  .btn-back-quiz{
+  .btn-quiz-nav{
     font-family:'Mitr', sans-serif; font-size:13px; color:#e8b86d;
     background:transparent; border:1px solid rgba(232,184,109,.4);
     border-radius:999px; padding:8px 18px; cursor:pointer; transition:.2s;
   }
-  .btn-back-quiz:hover{background:rgba(232,184,109,.15);}
+  .btn-quiz-nav:hover{background:rgba(232,184,109,.15);}
 
   /* ---- result ---- */
   .coupon{
@@ -200,7 +201,6 @@
   footer.credit{margin-top:26px; font-size:11px; color:rgba(247,236,226,.3); letter-spacing:.05em;}
 
   /* ---- nav bar ---- */
-  .stage{padding-bottom:86px;}
   .nav-bar{
     position:fixed; bottom:0; left:0; width:100%; z-index:20;
     display:flex; justify-content:center; gap:10px; flex-wrap:wrap;
@@ -345,6 +345,7 @@ function restartFlow(){
   currentQ = 0;
   userAnswers = {};
   wrongCount = 0;
+  quizCompletedOnce = false;
   document.getElementById('navBar').classList.remove('visible');
   goStage('stage-countdown');
 }
@@ -406,38 +407,74 @@ function renderQuestion(){
   renderDots();
   const card = document.getElementById('quizCard');
   const item = questions[currentQ];
+  const isAnswered = userAnswers.hasOwnProperty(currentQ);
+
   let inner = `<div class="qnum">ข้อที่ ${currentQ+1} / ${questions.length}</div>
                <div class="qtext">${item.q}</div>`;
 
   if(item.type==='choice'){
-    inner += `<div class="choices">` + item.choices.map(c=>
-      `<button class="choice" data-val="${c}">${c}</button>`
-    ).join('') + `</div>`;
+    inner += `<div class="choices">` + item.choices.map(c=>{
+      let extraClass = '';
+      if(isAnswered){
+        extraClass = ' disabled';
+        if(c === item.correct) extraClass += ' correct';
+        if(c === userAnswers[currentQ] && c !== item.correct) extraClass += ' wrong';
+      }
+      return `<button class="choice${extraClass}" data-val="${c}">${c}</button>`;
+    }).join('') + `</div>`;
   } else {
     const savedText = userAnswers[currentQ] || '';
-    inner += `<input type="text" class="text-input" id="textAns" value="${savedText}" placeholder="พิมพ์คำตอบของเธอที่นี่...">
-               <button class="btn" id="submitTextBtn" style="margin-top:16px; width:100%;">ยืนยันคำตอบ</button>`;
+    const disabledAttr = isAnswered ? 'disabled' : '';
+    inner += `<input type="text" class="text-input" id="textAns" value="${savedText}" ${disabledAttr} placeholder="พิมพ์คำตอบของเธอที่นี่...">`;
+    if(!isAnswered){
+      inner += `<button class="btn" id="submitTextBtn" style="margin-top:16px; width:100%;">ยืนยันคำตอบ</button>`;
+    }
   }
 
   inner += `<div class="feedback" id="feedback"></div>`;
 
+  inner += `<div class="quiz-actions">`;
   if(currentQ > 0){
-    inner += `<div class="quiz-actions"><button class="btn-back-quiz" id="prevQuizBtn">⬅️ ข้อก่อนหน้า</button></div>`;
+    inner += `<button class="btn-quiz-nav" id="prevQuizBtn">⬅️ ข้อก่อนหน้า</button>`;
+  } else {
+    inner += `<div></div>`;
   }
+  if(isAnswered && currentQ < questions.length - 1){
+    inner += `<button class="btn-quiz-nav" id="nextQuizBtn">ข้อถัดไป ➡️</button>`;
+  }
+  inner += `</div>`;
 
   card.innerHTML = inner;
 
-  if(item.type==='choice'){
-    card.querySelectorAll('.choice').forEach(btn=>{
-      btn.addEventListener('click', ()=> handleChoiceAnswer(btn, item));
-    });
-  } else {
-    document.getElementById('submitTextBtn').addEventListener('click', ()=> handleTextAnswer(item));
+  const feedbackEl = document.getElementById('feedback');
+
+  if(isAnswered){
+    if(item.type==='choice'){
+      const isCorrect = userAnswers[currentQ] === item.correct;
+      feedbackEl.textContent = isCorrect ? item.success : 'ข้อนี้ตอบผิดน้า 😅 (ล็อคคำตอบแล้ว ไม่สามารถเปลี่ยนได้)';
+    } else {
+      feedbackEl.textContent = userAnswers[currentQ].trim().length > 0 ? item.success : 'ข้อนี้เว้นว่างไว้ (ล็อคคำตอบแล้ว)';
+    }
+  }
+
+  if(!isAnswered){
+    if(item.type==='choice'){
+      card.querySelectorAll('.choice').forEach(btn=>{
+        btn.addEventListener('click', ()=> handleChoiceAnswer(btn, item));
+      });
+    } else {
+      document.getElementById('submitTextBtn').addEventListener('click', ()=> handleTextAnswer(item));
+    }
   }
 
   const prevBtn = document.getElementById('prevQuizBtn');
   if(prevBtn){
     prevBtn.addEventListener('click', prevQuestion);
+  }
+
+  const nextBtn = document.getElementById('nextQuizBtn');
+  if(nextBtn){
+    nextBtn.addEventListener('click', nextQuestion);
   }
 }
 
@@ -461,7 +498,7 @@ function handleChoiceAnswer(btn, item){
 function handleTextAnswer(item){
   const val = document.getElementById('textAns').value.trim();
   userAnswers[currentQ] = val;
-  document.getElementById('submitTextBtn').disabled = true;
+  if(document.getElementById('submitTextBtn')) document.getElementById('submitTextBtn').disabled = true;
   document.getElementById('textAns').disabled = true;
   if(val.length===0){
     document.getElementById('feedback').textContent = 'เธอลืมตอบรึเปล่าเนี่ย 🥲';
@@ -476,6 +513,16 @@ function prevQuestion(){
   if(currentQ > 0){
     currentQ--;
     renderQuestion();
+  }
+}
+
+function nextQuestion(){
+  if(advanceTimeout) clearTimeout(advanceTimeout);
+  if(currentQ < questions.length - 1){
+    currentQ++;
+    renderQuestion();
+  } else {
+    calculateResultAndShow();
   }
 }
 
@@ -566,3 +613,4 @@ document.getElementById('navRestart').addEventListener('click', ()=>{
 </script>
 </body>
 </html>
+
