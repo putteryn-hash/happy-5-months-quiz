@@ -150,6 +150,9 @@
     border-color: #e8b86d;
     background: rgba(232,184,109,0.2);
   }
+  .btn-test-trigger.hide {
+    display: none !important;
+  }
 
   /* ---- quiz ---- */
   .quiz-wrap{width:100%; max-width:440px;}
@@ -358,7 +361,7 @@
   </div>
 </section>
 
-<!-- STAGE 1: 10-SEC COUNTDOWN (YOUR ORIGINAL CODE) -->
+<!-- STAGE 1: 10-SEC COUNTDOWN -->
 <section class="stage" id="stage-countdown">
   <div class="fade-in">
     <div class="eyebrow">shh... it's a secret</div>
@@ -429,6 +432,14 @@ for(let i=0;i<40;i++){
 function goStage(id){
   document.querySelectorAll('.stage').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
+  
+  // ซ่อนปุ่มทดสอบ 🔒 ถ้าไม่ได้อยู่ในหน้าแรกสุด (stage-secret)
+  const bypassBtn = document.getElementById('testBypassBtn');
+  if(id === 'stage-secret'){
+    bypassBtn.classList.remove('hide');
+  } else {
+    bypassBtn.classList.add('hide');
+  }
 }
 
 /* ---------- STAGE 0: REAL-TIME MAIN COUNTDOWN ---------- */
@@ -490,7 +501,7 @@ document.getElementById('testBypassBtn').addEventListener('click', ()=>{
   }
 });
 
-/* ---------- STAGE 1: 10-SEC COUNTDOWN (YOUR EXACT ORIGINAL CODE) ---------- */
+/* ---------- STAGE 1: 10-SEC COUNTDOWN ---------- */
 const startBtn = document.getElementById('startCountdownBtn');
 const timerDisplay = document.getElementById('timerDisplay');
 const INITIAL_SECONDS = 10;
@@ -617,7 +628,6 @@ function triggerBottomEffect(isCorrect){
   const correctHearts = ['💖', '💗', '🌸', '❤️', '💕', '💘', '💓', '✨', '🤍', '💌'];
   const wrongEmojis = ['😡', '😤', '💢', 'งอนว่ะ', 'เค้างอน'];
   
-  /* ตอบถูก: พุ่งเยอะอลังการ (35 ดวง) / ตอบผิด: พุ่งปานกลาง (15 อัน) */
   const count = isCorrect ? 35 : 15;
   const delayStep = isCorrect ? 35 : 70;
 
@@ -627,7 +637,7 @@ function triggerBottomEffect(isCorrect){
       el.className = 'floating-emoji';
       if(isCorrect){
         el.textContent = correctHearts[Math.floor(Math.random() * correctHearts.length)];
-        el.style.fontSize = (22 + Math.random() * 20) + 'px'; // ขนาดสุ่ม
+        el.style.fontSize = (22 + Math.random() * 20) + 'px';
       } else {
         el.textContent = wrongEmojis[Math.floor(Math.random() * wrongEmojis.length)];
         el.style.fontSize = (20 + Math.random() * 12) + 'px';
