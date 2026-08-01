@@ -348,7 +348,7 @@
     <div class="eyebrow">shh... secret countdown</div>
     <div class="heart-glow">🔒</div>
     <h1>นับถอยหลังไปไหนไม่รู้<br>นับถอยหลังไปก่อนแฮะแฮะ...</h1>
-    <p class="sub">ความลับบบบ... ห้ามแอบเปิดก่อนนะ! 🤫<br>รอให้เวลานับถึง 0 ตอน 10 โมงเช้าก่อน แล้วค่อยกดดำเนินการต่อ</p>
+    <p class="sub">ความลับบบบ... ห้ามแอบเปิดก่อนนะ! 🤫<br>รอให้เวลานับถึง 0 ก่อน แล้วค่อยกดดำเนินการต่อ</p>
     
     <div class="timer-grid">
       <div class="timer-box"><div class="timer-val" id="d-days">00</div><div class="timer-lbl">วัน</div></div>
@@ -433,7 +433,6 @@ function goStage(id){
   document.querySelectorAll('.stage').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   
-  // ซ่อนปุ่มทดสอบ 🔒 ถ้าไม่ได้อยู่ในหน้าแรกสุด (stage-secret)
   const bypassBtn = document.getElementById('testBypassBtn');
   if(id === 'stage-secret'){
     bypassBtn.classList.remove('hide');
@@ -547,7 +546,6 @@ function restartFlow(){
   wrongCount = 0;
   quizCompletedOnce = false;
   
-  /* Reset envelope & letter */
   envelope.classList.remove('open');
   letterPaper.classList.remove('show');
   envHint.style.display = 'block';
@@ -608,7 +606,6 @@ function renderDots(){
   });
 }
 
-/* ตรวจสอบความถูกต้องของแต่ละข้อ */
 function checkIsCorrect(index, ans){
   if(!ans || ans.trim() === '') return false;
   const q = questions[index];
@@ -623,7 +620,6 @@ function checkIsCorrect(index, ans){
   return false;
 }
 
-/* เอฟเฟกต์พุ่งขึ้นจากด้านล่างหน้าจอ */
 function triggerBottomEffect(isCorrect){
   const correctHearts = ['💖', '💗', '🌸', '❤️', '💕', '💘', '💓', '✨', '🤍', '💌'];
   const wrongEmojis = ['😡', '😤', '💢', 'งอนว่ะ', 'เค้างอน'];
@@ -833,7 +829,7 @@ function showResult(){
   document.getElementById('toLetterBtn').addEventListener('click', ()=> goStage('stage-letter'));
 }
 
-/* ---------- RELIABLE ENVELOPE / LETTER LOGIC ---------- */
+/* ---------- ENVELOPE / LETTER LOGIC ---------- */
 const envelope = document.getElementById('envelope');
 const letterPaper = document.getElementById('letterPaper');
 const envHint = document.getElementById('envHint');
