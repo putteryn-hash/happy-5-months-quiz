@@ -70,7 +70,31 @@
     margin:0 auto 10px;
   }
 
-  /* ---- countdown ---- */
+  /* ---- Real-time Main Countdown ---- */
+  .timer-grid {
+    display: flex; gap: 12px; justify-content: center; align-items: center;
+    margin: 20px 0 30px;
+  }
+  .timer-box {
+    background: rgba(247,236,226,0.06);
+    border: 1px solid rgba(232,184,109,0.25);
+    border-radius: 14px;
+    padding: 12px 14px;
+    min-width: 68px;
+    backdrop-filter: blur(4px);
+  }
+  .timer-val {
+    font-family: 'Chonburi', serif;
+    font-size: clamp(24px, 5.5vw, 36px);
+    color: #e8b86d;
+    line-height: 1.1;
+    text-shadow: 0 0 15px rgba(232,184,109,.3);
+  }
+  .timer-lbl {
+    font-size: 11px; color: #d9c3ce; margin-top: 4px; font-weight: 300;
+  }
+
+  /* ---- 10-sec countdown (Original Style) ---- */
   .heart-glow{
     width:74px; height:74px; margin:0 auto 22px auto;
     display:flex; align-items:center; justify-content:center;
@@ -96,8 +120,36 @@
     box-shadow:0 8px 24px rgba(232,144,158,.28);
     transition:transform .2s ease, box-shadow .2s ease;
   }
-  .btn:hover{transform:translateY(-2px); box-shadow:0 12px 30px rgba(232,144,158,.4);}
+  .btn:hover:not(:disabled){transform:translateY(-2px); box-shadow:0 12px 30px rgba(232,144,158,.4);}
   .btn:disabled{opacity:.4; cursor:default; transform:none;}
+
+  /* ---- Bottom-Right Test Icon Button ---- */
+  .btn-test-trigger {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 99;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(247,236,226,0.08);
+    border: 1px solid rgba(232,184,109,0.3);
+    color: #e8b86d;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+    transition: all 0.25s ease;
+    opacity: 0.6;
+  }
+  .btn-test-trigger:hover {
+    opacity: 1;
+    transform: scale(1.1);
+    border-color: #e8b86d;
+    background: rgba(232,184,109,0.2);
+  }
 
   /* ---- quiz ---- */
   .quiz-wrap{width:100%; max-width:440px;}
@@ -287,8 +339,27 @@
   <button class="nav-btn" id="navRestart">🔄 เริ่มใหม่</button>
 </div>
 
-<!-- STAGE 1: COUNTDOWN -->
-<section class="stage active" id="stage-countdown">
+<!-- STAGE 0: REAL-TIME COUNTDOWN (MAIN PAGE) -->
+<section class="stage active" id="stage-secret">
+  <div class="fade-in">
+    <div class="eyebrow">shh... secret countdown</div>
+    <div class="heart-glow">🔒</div>
+    <h1>นับถอยหลังไปไหนไม่รู้<br>นับถอยหลังไปก่อนแฮะแฮะ...</h1>
+    <p class="sub">ความลับบบบ... ห้ามแอบเปิดก่อนนะ! 🤫<br>รอให้เวลานับถึง 0 ตอน 10 โมงเช้าก่อน แล้วค่อยกดดำเนินการต่อ</p>
+    
+    <div class="timer-grid">
+      <div class="timer-box"><div class="timer-val" id="d-days">00</div><div class="timer-lbl">วัน</div></div>
+      <div class="timer-box"><div class="timer-val" id="d-hours">00</div><div class="timer-lbl">ชม.</div></div>
+      <div class="timer-box"><div class="timer-val" id="d-mins">00</div><div class="timer-lbl">นาที</div></div>
+      <div class="timer-box"><div class="timer-val" id="d-secs">00</div><div class="timer-lbl">วินาที</div></div>
+    </div>
+
+    <button class="btn" id="secretBtn" disabled>🔒 ยังไม่ถึงเวลาเลย ย้อนกลับไปก่อนน</button>
+  </div>
+</section>
+
+<!-- STAGE 1: 10-SEC COUNTDOWN (YOUR ORIGINAL CODE) -->
+<section class="stage" id="stage-countdown">
   <div class="fade-in">
     <div class="eyebrow">shh... it's a secret</div>
     <div class="heart-glow">🤍</div>
@@ -339,6 +410,9 @@
   </div>
 </section>
 
+<!-- Bottom Right Secret Test Button -->
+<button class="btn-test-trigger" id="testBypassBtn" title="ทดสอบระบบ">🔒</button>
+
 <script>
 /* ---------- ambient stars ---------- */
 const starsEl = document.getElementById('stars');
@@ -357,7 +431,66 @@ function goStage(id){
   document.getElementById(id).classList.add('active');
 }
 
-/* ---------- countdown ---------- */
+/* ---------- STAGE 0: REAL-TIME MAIN COUNTDOWN ---------- */
+const secretBtn = document.getElementById('secretBtn');
+
+function getTargetDate(){
+  const now = new Date();
+  let target = new Date(now.getFullYear(), now.getMonth(), 14, 10, 0, 0); // วันที่ 14 เวลา 10:00:00
+  if(now.getTime() > target.getTime()){
+    target = new Date(now.getFullYear(), now.getMonth() + 1, 14, 10, 0, 0);
+  }
+  return target;
+}
+
+const targetDate = getTargetDate();
+
+function updateTargetCountdown(){
+  const now = new Date().getTime();
+  const diff = targetDate.getTime() - now;
+
+  if(diff <= 0){
+    document.getElementById('d-days').textContent = '00';
+    document.getElementById('d-hours').textContent = '00';
+    document.getElementById('d-mins').textContent = '00';
+    document.getElementById('d-secs').textContent = '00';
+    
+    secretBtn.disabled = false;
+    secretBtn.textContent = 'คลิกเพื่อเปิดความลับ! ✨';
+    document.querySelector('#stage-secret .heart-glow').textContent = '🔓';
+    return;
+  }
+
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+  document.getElementById('d-days').textContent = String(days).padStart(2, '0');
+  document.getElementById('d-hours').textContent = String(hours).padStart(2, '0');
+  document.getElementById('d-mins').textContent = String(minutes).padStart(2, '0');
+  document.getElementById('d-secs').textContent = String(seconds).padStart(2, '0');
+}
+
+setInterval(updateTargetCountdown, 1000);
+updateTargetCountdown();
+
+secretBtn.addEventListener('click', ()=>{
+  goStage('stage-countdown');
+});
+
+/* ---------- SECRET BYPASS SYSTEM FOR TESTING ---------- */
+document.getElementById('testBypassBtn').addEventListener('click', ()=>{
+  const pass = prompt('กรุณากรอกรหัสลับเพื่อทดสอบระบบ:');
+  if(pass === 'Patter14121412'){
+    alert('ปลดล็อกระบบทดสอบเรียบร้อย! ✨');
+    goStage('stage-countdown');
+  } else if(pass !== null) {
+    alert('รหัสผ่านไม่ถูกต้องครับ');
+  }
+});
+
+/* ---------- STAGE 1: 10-SEC COUNTDOWN (YOUR EXACT ORIGINAL CODE) ---------- */
 const startBtn = document.getElementById('startCountdownBtn');
 const timerDisplay = document.getElementById('timerDisplay');
 const INITIAL_SECONDS = 10;
@@ -409,7 +542,7 @@ function restartFlow(){
   envHint.style.display = 'block';
 
   document.getElementById('navBar').classList.remove('visible');
-  goStage('stage-countdown');
+  goStage('stage-secret');
 }
 
 /* ---------- quiz data ---------- */
