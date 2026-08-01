@@ -208,6 +208,21 @@
     font-family:'Cormorant Garamond',serif; font-style:italic;
   }
 
+  /* Floating Bottom Effects (Correct/Wrong) */
+  .floating-emoji {
+    position: fixed;
+    bottom: -50px;
+    z-index: 100;
+    pointer-events: none;
+    font-size: 26px;
+    animation: floatUp 1.8s ease-out forwards;
+  }
+  @keyframes floatUp {
+    0% { opacity: 1; transform: translateY(0) scale(0.6) rotate(0deg); }
+    50% { opacity: 1; }
+    100% { opacity: 0; transform: translateY(-100vh) scale(1.3) rotate(var(--rot)); }
+  }
+
   /* Particle Burst Effect */
   .sparkle-particle {
     position:absolute; pointer-events:none; z-index:10;
@@ -464,6 +479,25 @@ function checkIsCorrect(index, ans){
   return false;
 }
 
+/* เอฟเฟกต์พุ่งขึ้นจากด้านล่างหน้าจอ */
+function triggerBottomEffect(isCorrect){
+  const items = isCorrect ? ['💖', '💗', '🌸', '❤️', '✨'] : ['😡', '😤', '💢', 'งอนว่ะ', 'เค้างอน'];
+  for(let i = 0; i < 15; i++){
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'floating-emoji';
+      el.textContent = items[Math.floor(Math.random() * items.length)];
+      el.style.left = (10 + Math.random() * 80) + 'vw';
+      el.style.setProperty('--rot', (Math.random() * 60 - 30) + 'deg');
+      if(!isCorrect){
+        el.style.fontSize = (20 + Math.random() * 12) + 'px';
+      }
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 1800);
+    }, i * 70);
+  }
+}
+
 function renderQuestion(){
   if(advanceTimeout) clearTimeout(advanceTimeout);
   renderDots();
@@ -549,6 +583,8 @@ function handleChoiceAnswer(btn, item){
   userAnswers[currentQ] = selectedVal;
   
   const isCorrect = checkIsCorrect(currentQ, selectedVal);
+  triggerBottomEffect(isCorrect);
+
   if(isCorrect){
     btn.classList.add('correct');
     document.getElementById('feedback').textContent = item.praise;
@@ -568,8 +604,10 @@ function handleTextAnswer(item){
   
   if(val.length===0){
     document.getElementById('feedback').textContent = 'ไออ้วนทำไมไม่ตอบคำถามเค้า งอนแล่ว';
+    triggerBottomEffect(false);
   } else {
     const isRight = checkIsCorrect(currentQ, val);
+    triggerBottomEffect(isRight);
     document.getElementById('feedback').textContent = isRight ? item.praise : 'โห่ไออ้วนจำของเค้าม่ายด้ายเค้างอนแล้วหน่า';
   }
   advanceAfterDelay();
@@ -703,3 +741,4 @@ document.getElementById('navRestart').addEventListener('click', ()=>{
 </script>
 </body>
 </html>
+
