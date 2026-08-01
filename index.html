@@ -54,7 +54,7 @@
   }
   h1{
     font-family:'Chonburi', serif; font-weight:400;
-    font-size:clamp(26px,6vw,40px); line-height:1.35;
+    font-size:clamp(24px,5.5vw,38px); line-height:1.35;
     color:#f7ece2; margin-bottom:16px;
     text-shadow:0 2px 18px rgba(232,144,158,.25);
   }
@@ -211,7 +211,7 @@
     100% { opacity:0; transform:translate(var(--dx), var(--dy)) scale(1.4) rotate(180deg); }
   }
 
-  /* Letter Paper (NO-BUG FIX) */
+  /* Letter Paper */
   .letter-paper{
     display:none; width:100%; max-width:420px; margin:20px auto 0;
     background:linear-gradient(180deg,#fbf3e7,#f4e6d3);
@@ -270,8 +270,8 @@
   <div class="fade-in">
     <div class="eyebrow">shh... it's a secret</div>
     <div class="heart-glow">🤍</div>
-    <h1>มีบางอย่าง<br>กำลังจะถูกปลดล็อก</h1>
-    <p class="sub">อีกไม่กี่นาที เธอจะได้รู้ว่ามันคืออะไร<br>กดปุ่มด้านล่างเพื่อเริ่มการนับถอยหลัง</p>
+    <h1>อ้วนอยากรู้มั้ยข้างในมีอะไร<br>รอเวลาก่อนนะ</h1>
+    <p class="sub">อีกไม่กี่วินาที อ้วนจะได้รู้ว่ามันคืออะไร<br>กดปุ่มด้านล่างเพื่อเริ่มการนับถอยหลัง</p>
     <div class="timer" id="timerDisplay">00:10</div>
     <button class="btn" id="startCountdownBtn">เริ่มนับถอยหลัง</button>
   </div>
@@ -393,37 +393,32 @@ function restartFlow(){
 /* ---------- quiz data ---------- */
 const questions = [
   {
-    q: 'จำได้ไหมว่าวันแรกที่เราเริ่มคุยกัน หรือวันที่เราตกลงคบกัน คือวันที่เท่าไหร่?',
+    q: 'อ้วนจำได้มั้ยวันที่เราคบกันคือวันที่เท่าไหร่',
     type:'choice',
-    choices:['22','2','44','14'],
-    correct:'14',
-    success:'เก่งมาก! จำแม่นแบบนี้เอาไปเลย 10 คะแนนเต็ม ❤️'
+    choices:['2','22','24','14'],
+    correct:'14'
   },
   {
-    q:'เวลาเค้าเหงา/อารมณ์ไม่ดี เมนูโปรดที่เห็นแล้วเค้าจะอารมณ์ดีขึ้นทันทีคืออะไร?',
+    q:'ของโปรดที่เค้าชอบกินคืออะไร',
     type:'choice',
     choices:['ชาไข่มุก','หมูกระทะ','ขนมหวาน','หมูกรอบ'],
-    correct:'หมูกรอบ',
-    success:'รู้ใจที่สุด! สมกับเป็นแฟนเค้าจริงๆ 😋'
+    correct:'หมูกรอบ'
   },
   {
-    q:"เวลาอยู่ไกลกัน แล้วเค้าพิมพ์มาว่า 'ทำไรอยู่' ความหมายที่แท้จริงคืออะไร?",
+    q:'เค้าไม่ชอบให้อ้วนเรียกเค้าว่าอะไร',
     type:'choice',
-    choices:['A. ถามไปอย่างนั้นแหละ','B. อยากรู้จริงๆ ว่าทำอะไร','C. คิดถึงมากๆ อยากคุยด้วยแล้ว!'],
-    correct:'C. คิดถึงมากๆ อยากคุยด้วยแล้ว!',
-    success:'ถูกเป๊ะ! ต่อไปถ้าพิมพ์คำนี้ แปลว่าคิดถึงอยู่นะรู้ยัง 🥰'
+    choices:['พัตเตอร์','เตอร์','เต้อ','พัต'],
+    correct:'พัตเตอร์'
   },
   {
-    q:'รูปคู่รูปแรกที่เราถ่ายด้วยกัน หรือสถานที่แรกที่เราไปเที่ยวด้วยกันคือที่ไหน?',
-    type:'text',
-    success:'ย้อนนึกถึงตอนนั้นแล้วยังเขินอยู่นะเนี่ย 😳'
+    q:'รูปแรกที่เราถ่ายคู่กันที่แรกคือที่ไหน',
+    type:'text'
   },
   {
-    q:'ข้อสุดท้ายแล้ว... คบกันมา 5 เดือนแล้ว รู้อยู่แล้วใช่ไหมว่าเค้ารักเธอมากขนาดไหน?',
+    q:'คบกันมา 5 เดือน อ้วนรักเค้ามากแค่ไหน',
     type:'choice',
-    choices:['A. รู้แล้วรักเหมือนกัน','B. รู้สิ รักที่สุดเลย','C. รู้แล้ว และกดปุ่มนี้เพื่ออ่านจดหมายลับได้เลย!'],
-    correct:'C. รู้แล้ว และกดปุ่มนี้เพื่ออ่านจดหมายลับได้เลย!',
-    success:'ปลดล็อกสำเร็จ! เตรียมใจไว้เลยนะ... 💌'
+    choices:['รักมากๆที่สุดในโลกเลย!','รักอ้วนคนเดียวตลอดไป💗','รักมากกว่าสิ่งไหนทั้งหมดเลย!'],
+    correct:'ANY' // เลือกข้อไหนก็ถือว่าถูก
   }
 ];
 
@@ -442,6 +437,21 @@ function renderDots(){
   });
 }
 
+/* ตรวจสอบความถูกต้องของแต่ละข้อ */
+function checkIsCorrect(index, ans){
+  if(!ans || ans.trim() === '') return false;
+  const q = questions[index];
+  if(q.type === 'choice'){
+    if(q.correct === 'ANY') return true;
+    return ans === q.correct;
+  } else if(q.type === 'text'){
+    const keywords = ['ตี๋', 'ตี๋น้อย', 'ร้าน', 'ชาบู'];
+    const lowerAns = ans.toLowerCase();
+    return keywords.some(kw => lowerAns.includes(kw));
+  }
+  return false;
+}
+
 function renderQuestion(){
   if(advanceTimeout) clearTimeout(advanceTimeout);
   renderDots();
@@ -457,15 +467,16 @@ function renderQuestion(){
       let extraClass = '';
       if(isAnswered){
         extraClass = ' disabled';
-        if(c === item.correct) extraClass += ' correct';
-        if(c === userAnswers[currentQ] && c !== item.correct) extraClass += ' wrong';
+        const isThisCorrect = (item.correct === 'ANY' && c === userAnswers[currentQ]) || (c === item.correct);
+        if(isThisCorrect) extraClass += ' correct';
+        if(c === userAnswers[currentQ] && !isThisCorrect) extraClass += ' wrong';
       }
       return `<button class="choice${extraClass}" data-val="${c}">${c}</button>`;
     }).join('') + `</div>`;
   } else {
     const savedText = userAnswers[currentQ] || '';
     const disabledAttr = isAnswered ? 'disabled' : '';
-    inner += `<input type="text" class="text-input" id="textAns" value="${savedText}" ${disabledAttr} placeholder="พิมพ์คำตอบของเธอที่นี่...">`;
+    inner += `<input type="text" class="text-input" id="textAns" value="${savedText}" ${disabledAttr} placeholder="พิมพ์คำตอบของอ้วนที่นี่...">`;
     if(!isAnswered){
       inner += `<button class="btn" id="submitTextBtn" style="margin-top:16px; width:100%;">ยืนยันคำตอบ</button>`;
     }
@@ -489,11 +500,12 @@ function renderQuestion(){
   const feedbackEl = document.getElementById('feedback');
 
   if(isAnswered){
-    if(item.type==='choice'){
-      const isCorrect = userAnswers[currentQ] === item.correct;
-      feedbackEl.textContent = isCorrect ? item.success : 'ข้อนี้ตอบผิดน้า 😅 (ล็อคคำตอบแล้ว ไม่สามารถเปลี่ยนได้)';
+    const userVal = userAnswers[currentQ];
+    if(!userVal || userVal.trim() === ''){
+      feedbackEl.textContent = 'ไออ้วนทำไมไม่ตอบคำถามเค้า งอนแล่ว';
     } else {
-      feedbackEl.textContent = userAnswers[currentQ].trim().length > 0 ? item.success : 'ข้อนี้เว้นว่างไว้ (ล็อคคำตอบแล้ว)';
+      const isRight = checkIsCorrect(currentQ, userVal);
+      feedbackEl.textContent = isRight ? 'เก่งมากแฟนเค้า💗' : 'ไออ้วนจำไม่ได้โดนลงโทษแน่';
     }
   }
 
@@ -524,14 +536,15 @@ function handleChoiceAnswer(btn, item){
   const selectedVal = btn.dataset.val;
   userAnswers[currentQ] = selectedVal;
   
-  const isCorrect = selectedVal === item.correct;
+  const isCorrect = checkIsCorrect(currentQ, selectedVal);
   if(isCorrect){
     btn.classList.add('correct');
+    document.getElementById('feedback').textContent = 'เก่งมากแฟนเค้า💗';
   } else {
     btn.classList.add('wrong');
     allBtns.forEach(b=>{ if(b.dataset.val===item.correct) b.classList.add('correct'); });
+    document.getElementById('feedback').textContent = 'ไออ้วนจำไม่ได้โดนลงโทษแน่';
   }
-  document.getElementById('feedback').textContent = isCorrect ? item.success : 'ยังไม่ถูกนะ 😅 แต่ไม่เป็นไร ไปข้อต่อไปกันเลย';
   advanceAfterDelay();
 }
 
@@ -540,10 +553,12 @@ function handleTextAnswer(item){
   userAnswers[currentQ] = val;
   if(document.getElementById('submitTextBtn')) document.getElementById('submitTextBtn').disabled = true;
   document.getElementById('textAns').disabled = true;
+  
   if(val.length===0){
-    document.getElementById('feedback').textContent = 'เธอลืมตอบรึเปล่าเนี่ย 🥲';
+    document.getElementById('feedback').textContent = 'ไออ้วนทำไมไม่ตอบคำถามเค้า งอนแล่ว';
   } else {
-    document.getElementById('feedback').textContent = item.success;
+    const isRight = checkIsCorrect(currentQ, val);
+    document.getElementById('feedback').textContent = isRight ? 'เก่งมากแฟนเค้า💗' : 'ไออ้วนจำไม่ได้โดนลงโทษแน่';
   }
   advanceAfterDelay();
 }
@@ -580,11 +595,8 @@ function advanceAfterDelay(){
 function calculateResultAndShow(){
   wrongCount = 0;
   questions.forEach((q, i) => {
-    if(q.type === 'choice' && userAnswers[i] !== q.correct){
-      wrongCount++;
-    } else if(q.type === 'text' && (!userAnswers[i] || userAnswers[i].trim() === '')){
-      wrongCount++;
-    }
+    const isRight = checkIsCorrect(i, userAnswers[i]);
+    if(!isRight) wrongCount++;
   });
   showResult();
 }
@@ -653,7 +665,6 @@ envelope.addEventListener('click', ()=>{
   envHint.style.display = 'none';
   createSparkles();
   
-  /* Fade in letter paper safely without overflow issues */
   setTimeout(()=>{
     letterPaper.classList.add('show');
   }, 400);
@@ -680,4 +691,3 @@ document.getElementById('navRestart').addEventListener('click', ()=>{
 </script>
 </body>
 </html>
-
