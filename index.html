@@ -44,7 +44,14 @@
     text-align:center;
   }
   .stage.active{display:flex;}
-  .fade-in{animation:fadeIn .8s ease both;}
+  .fade-in{
+    animation:fadeIn .8s ease both;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    width:100%;
+  }
   @keyframes fadeIn{from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:translateY(0);}}
 
   .eyebrow{
@@ -65,7 +72,7 @@
 
   /* ---- countdown ---- */
   .heart-glow{
-    width:74px; height:74px; margin-bottom:22px;
+    width:74px; height:74px; margin:0 auto 22px auto;
     display:flex; align-items:center; justify-content:center;
     font-size:32px;
     border-radius:50%;
@@ -396,29 +403,34 @@ const questions = [
     q: 'อ้วนจำได้มั้ยวันที่เราคบกันคือวันที่เท่าไหร่',
     type:'choice',
     choices:['2','22','24','14'],
-    correct:'14'
+    correct:'14',
+    praise:'เก่งมากไออ้วนของเค้าจำได้แม่นเลย'
   },
   {
     q:'ของโปรดที่เค้าชอบกินคืออะไร',
     type:'choice',
     choices:['ชาไข่มุก','หมูกระทะ','ขนมหวาน','หมูกรอบ'],
-    correct:'หมูกรอบ'
+    correct:'หมูกรอบ',
+    praise:'สุดยอดเลยไออ้วน ดีมากจำได้ด้วย'
   },
   {
     q:'เค้าไม่ชอบให้อ้วนเรียกเค้าว่าอะไร',
     type:'choice',
     choices:['พัตเตอร์','เตอร์','เต้อ','พัต'],
-    correct:'พัตเตอร์'
+    correct:'พัตเตอร์',
+    praise:'ดี ถ้าเผลอเรียกผิดนะเดี๋ยวจะโดน'
   },
   {
     q:'รูปแรกที่เราถ่ายคู่กันที่แรกคือที่ไหน',
-    type:'text'
+    type:'text',
+    praise:'ดีมากจำได้ดีเลย'
   },
   {
     q:'คบกันมา 5 เดือน อ้วนรักเค้ามากแค่ไหน',
     type:'choice',
     choices:['รักมากๆที่สุดในโลกเลย!','รักอ้วนคนเดียวตลอดไป💗','รักมากกว่าสิ่งไหนทั้งหมดเลย!'],
-    correct:'ANY' // เลือกข้อไหนก็ถือว่าถูก
+    correct:'ANY',
+    praise:'เค้าก็รักอ้วนมากๆเหมือนกันนะ'
   }
 ];
 
@@ -505,7 +517,7 @@ function renderQuestion(){
       feedbackEl.textContent = 'ไออ้วนทำไมไม่ตอบคำถามเค้า งอนแล่ว';
     } else {
       const isRight = checkIsCorrect(currentQ, userVal);
-      feedbackEl.textContent = isRight ? 'เก่งมากแฟนเค้า💗' : 'ไออ้วนจำไม่ได้โดนลงโทษแน่';
+      feedbackEl.textContent = isRight ? item.praise : 'โห่ไออ้วนจำของเค้าม่ายด้ายเค้างอนแล้วหน่า';
     }
   }
 
@@ -539,11 +551,11 @@ function handleChoiceAnswer(btn, item){
   const isCorrect = checkIsCorrect(currentQ, selectedVal);
   if(isCorrect){
     btn.classList.add('correct');
-    document.getElementById('feedback').textContent = 'เก่งมากแฟนเค้า💗';
+    document.getElementById('feedback').textContent = item.praise;
   } else {
     btn.classList.add('wrong');
     allBtns.forEach(b=>{ if(b.dataset.val===item.correct) b.classList.add('correct'); });
-    document.getElementById('feedback').textContent = 'ไออ้วนจำไม่ได้โดนลงโทษแน่';
+    document.getElementById('feedback').textContent = 'โห่ไออ้วนจำของเค้าม่ายด้ายเค้างอนแล้วหน่า';
   }
   advanceAfterDelay();
 }
@@ -558,7 +570,7 @@ function handleTextAnswer(item){
     document.getElementById('feedback').textContent = 'ไออ้วนทำไมไม่ตอบคำถามเค้า งอนแล่ว';
   } else {
     const isRight = checkIsCorrect(currentQ, val);
-    document.getElementById('feedback').textContent = isRight ? 'เก่งมากแฟนเค้า💗' : 'ไออ้วนจำไม่ได้โดนลงโทษแน่';
+    document.getElementById('feedback').textContent = isRight ? item.praise : 'โห่ไออ้วนจำของเค้าม่ายด้ายเค้างอนแล้วหน่า';
   }
   advanceAfterDelay();
 }
